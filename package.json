@@ -1,0 +1,66 @@
+{
+  "name": "sharedsharder",
+  "version": "1.0.0",
+  "description": "Shard your discord.js bot across devices!",
+  "main": "build/main/index.js",
+  "typings": "build/main/index.d.ts",
+  "module": "build/module/index.js",
+  "repository": "https://github.com/zihadmahiuddin/sharedsharder",
+  "license": "GPL-3.0-only",
+  "keywords": [],
+  "scripts": {
+    "build": "run-p build:*",
+    "build:main": "tsc -p tsconfig.json",
+    "build:module": "tsc -p tsconfig.module.json",
+    "fix": "run-s fix:*",
+    "fix:prettier": "prettier \"src/**/*.ts\" --write",
+    "fix:lint": "eslint src --ext .ts --fix",
+    "test": "run-s build test:*",
+    "test:lint": "eslint src --ext .ts",
+    "test:prettier": "prettier \"src/**/*.ts\" --list-different",
+    "watch:build": "tsc -p tsconfig.json -w",
+    "doc": "run-s doc:html && open-cli build/docs/index.html",
+    "doc:html": "typedoc src/ --exclude **/*.spec.ts --target ES6 --mode file --out build/docs",
+    "doc:json": "typedoc src/ --exclude **/*.spec.ts --target ES6 --mode file --json build/docs/typedoc.json",
+    "reset-hard": "git clean -dfx && git reset --hard && yarn",
+    "prepare": "tsc -p tsconfig.json",
+    "example-client": "node build/main/examples/client.js",
+    "example-server": "node build/main/examples/server.js"
+  },
+  "engines": {
+    "node": ">=10"
+  },
+  "devDependencies": {
+    "@types/bytebuffer": "^5.0.41",
+    "@types/node": "^14.11.8",
+    "@typescript-eslint/eslint-plugin": "^4.0.1",
+    "@typescript-eslint/parser": "^4.0.1",
+    "eslint": "^7.8.0",
+    "eslint-config-prettier": "^6.11.0",
+    "eslint-plugin-eslint-comments": "^3.2.0",
+    "eslint-plugin-import": "^2.22.0",
+    "npm-run-all": "^4.1.5",
+    "open-cli": "^6.0.1",
+    "prettier": "^2.1.1",
+    "typedoc": "^0.19.0",
+    "typescript": "^4.0.2"
+  },
+  "files": [
+    "build/main",
+    "build/module",
+    "!**/*.spec.*",
+    "!**/*.json",
+    "CHANGELOG.md",
+    "LICENSE",
+    "README.md"
+  ],
+  "dependencies": {
+    "bytebuffer": "^5.0.1",
+    "discord.js": "^12.3.1",
+    "leeks.js": "^0.0.9",
+    "tweetnacl": "^1.0.3"
+  },
+  "optionalDependencies": {
+    "dotenv": "^8.2.0"
+  }
+}
