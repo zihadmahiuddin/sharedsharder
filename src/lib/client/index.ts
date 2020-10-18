@@ -292,7 +292,7 @@ export class Client extends DiscordClient {
         } else reject("Not connected to the sharder.");
       });
     } else
-      return new Promise((r) =>
+      return new Promise<T[]>((r) =>
         this.__eval(code).then((result) => r([result]))
       );
   }

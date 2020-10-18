@@ -24,6 +24,7 @@
     "doc:json": "typedoc src/ --exclude **/*.spec.ts --target ES6 --mode file --json build/docs/typedoc.json",
     "reset-hard": "git clean -dfx && git reset --hard && yarn",
     "prepare": "tsc -p tsconfig.json",
+    "prepack": "tsc -p tsconfig.json",
     "example-client": "node build/main/examples/client.js",
     "example-server": "node build/main/examples/server.js"
   },
