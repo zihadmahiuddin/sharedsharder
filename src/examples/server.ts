@@ -10,12 +10,6 @@ const server = new Server({
   token: process.env.DISCORD_TOKEN,
 });
 
-server.on("clientDisconnected", (session) => {
-  console.log(
-    `Client ${session.socket.remoteAddress}:${session.socket.remotePort} disconnected`
-  );
-});
-
 server.on("close", () => {
   console.warn("SocketShard Server closed.");
 });
@@ -29,6 +23,25 @@ server.on("connection", (session) =>
 server.on("listening", () => {
   console.log(
     `SocketShard Server started on ${server.options.hostname}:${server.options.port}!`
+  );
+});
+
+server.on("shardInfoSent", (session, shardIds) => {
+  console.log(
+    `Client ${session.socket.remoteAddress}:${session.socket.remotePort} got shards: [${shardIds}]`
+  );
+
+  console.log(
+    `Disconnected shards: [${server.disconnectedShardIds}], connected shards: [${server.connectedShardIds}]`
+  );
+});
+
+server.on("clientDisconnected", (session) => {
+  console.log(
+    `Client ${session.socket.remoteAddress}:${session.socket.remotePort} disconnected with shards: [${session.shardIds}]`
+  );
+  console.log(
+    `Disconnected shards: [${server.disconnectedShardIds}], connected shards: [${server.connectedShardIds}]`
   );
 });
 

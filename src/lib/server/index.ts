@@ -219,6 +219,17 @@ export class Server extends EventEmitter {
     this.heartbeatCheckInterval = setInterval(this.heartbeatCheck, 5000);
     this.shardDistributionInterval = setInterval(this.shardDistribution, 100);
   };
+
+  get connectedShardIds() {
+    return this.sessions.map((x) => x.shardIds).flat();
+  }
+
+  get disconnectedShardIds() {
+    return new Array(this.options.shardCount)
+      .fill(1)
+      .map((_x, i) => i)
+      .filter((x) => !this.connectedShardIds.includes(x));
+  }
 }
 
 export default Server;
