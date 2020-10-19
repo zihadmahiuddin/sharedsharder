@@ -36,6 +36,7 @@ export interface ServerEvents {
   close: [];
   connection: [session: ServerSession];
   listening: [];
+  shardInfoSent: [session: ServerSession, shardIds: number[]];
 }
 
 export declare interface Server {
@@ -190,7 +191,7 @@ export class Server extends EventEmitter {
     }
   };
 
-  private shardDistributiton = () => {
+  private shardDistribution = () => {
     if (this.latestShardInfoSendTime + 5000 > Date.now()) return;
     const sessionArray = Array.from(this.sessions.values());
     for (const session of sessionArray) {
@@ -203,6 +204,7 @@ export class Server extends EventEmitter {
               session.maxShardCount
             );
             session.shardIds = shardInfoPacket.shardIds;
+            this.emit("shardInfoSent", session, shardInfoPacket.shardIds);
             session.sendPacket(shardInfoPacket);
             session.shardInfoSentAt = Date.now();
             break;
@@ -215,7 +217,7 @@ export class Server extends EventEmitter {
   private onListening = () => {
     this.emit("listening");
     this.heartbeatCheckInterval = setInterval(this.heartbeatCheck, 5000);
-    this.shardDistributionInterval = setInterval(this.shardDistributiton, 100);
+    this.shardDistributionInterval = setInterval(this.shardDistribution, 100);
   };
 }
 
