@@ -1,8 +1,9 @@
 import { Client } from "..";
 
 const client = new Client({
-  serverKey: process.env.SERVER_PUBLIC_KEY,
+  disableEncryption: true,
   maxShardCount: 1,
+  serverKey: process.env.SERVER_PUBLIC_KEY,
   // sharedShardingEnabled: false,
 });
 

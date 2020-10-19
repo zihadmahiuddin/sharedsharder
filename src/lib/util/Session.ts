@@ -45,6 +45,7 @@ export class Session extends EventEmitter {
   constructor(
     public socket: net.Socket,
     private crypto: Crypto,
+    public disableEncryption: boolean,
     public packetReceiver = new PacketReceiver()
   ) {
     super();
@@ -54,14 +55,16 @@ export class Session extends EventEmitter {
     if (!packet.payload) packet.payload = new ByteBuffer();
     packet.session = this;
     packet.encode();
-    const encryptedPayload = this.crypto.encrypt(
-      packet.id,
-      packet.payload.buffer.slice(0, packet.payload.offset)
-    );
+    const payload = this.disableEncryption
+      ? packet.payload.buffer
+      : this.crypto.encrypt(
+          packet.id,
+          packet.payload.buffer.slice(0, packet.payload.offset)
+        );
     const header = Buffer.alloc(6);
     header.writeUInt16BE(packet.id);
-    header.writeUInt32BE(encryptedPayload.length, 2);
-    this.socket.write(Buffer.concat([header, encryptedPayload]));
+    header.writeUInt32BE(payload.length, 2);
+    this.socket.write(Buffer.concat([header, payload]));
     packet.processSend();
     this.emit("packetSent", packet);
   }
@@ -71,7 +74,9 @@ export class Session extends EventEmitter {
     if (fullPayload.length < 6) return;
     const header = fullPayload.slice(0, 6);
     const id = header.readUInt16BE();
-    fullPayload = this.crypto.decrypt(id, fullPayload.slice(6));
+    fullPayload = this.disableEncryption
+      ? fullPayload.slice(6)
+      : this.crypto.decrypt(id, fullPayload.slice(6));
     const PacketClass = Factory.get(id);
     if (PacketClass) {
       const packet = new PacketClass();
@@ -90,8 +95,8 @@ export class ClientSession extends Session {
   client: Client;
   shardCount: number;
 
-  constructor(socket: net.Socket, crypto: Crypto) {
-    super(socket, crypto);
+  constructor(socket: net.Socket, crypto: Crypto, disableEncryption: boolean) {
+    super(socket, crypto, disableEncryption);
   }
 }
 
@@ -101,7 +106,12 @@ export class ServerSession extends Session {
   server: Server;
   shardInfoSentAt: number;
 
-  constructor(public botToken: string, socket: net.Socket, crypto: Crypto) {
-    super(socket, crypto);
+  constructor(
+    public botToken: string,
+    socket: net.Socket,
+    crypto: Crypto,
+    disableEncryption: boolean
+  ) {
+    super(socket, crypto, disableEncryption);
   }
 }

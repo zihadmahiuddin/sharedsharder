@@ -9,10 +9,6 @@ import ServerCrypto from "./Crypto";
 
 export interface ServerOptions {
   /**
-   * Hex encoded secret key to generate the server keypair for encryption
-   */
-  secretKey: string;
-  /**
    * The number of shards to use
    */
   shardCount: number;
@@ -20,6 +16,15 @@ export interface ServerOptions {
    * The token to use for logging in to discord
    */
   token: string;
+  /**
+   * Hex encoded secret key to generate the server keypair for encryption
+   */
+  secretKey?: string;
+  /**
+   * Disables encryption. Not recommended if the server is open to public.
+   * @default false
+   */
+  disableEncryption?: boolean;
   /**
    * The port to listen on.
    * @default 5252
@@ -94,7 +99,8 @@ export class Server extends EventEmitter {
 
   constructor(public options: ServerOptions) {
     super();
-    if (!options.secretKey) {
+    options.disableEncryption = options.disableEncryption || false;
+    if (!options.secretKey && !options.disableEncryption) {
       throw new Error("Secret Key is required for encryption.");
     }
 
@@ -133,7 +139,12 @@ export class Server extends EventEmitter {
 
   private onConnection = (socket: net.Socket) => {
     const crypto = new ServerCrypto(this.options.secretKey);
-    const session = new ServerSession(this.options.token, socket, crypto);
+    const session = new ServerSession(
+      this.options.token,
+      socket,
+      crypto,
+      this.options.disableEncryption
+    );
     session.server = this;
     this.sessions.push(session);
     crypto.session = session;

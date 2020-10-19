@@ -21,7 +21,12 @@ export interface ClientOptions extends DiscordClientOptions {
   /**
    * Hex encoded public key of the server to use for encryption
    */
-  serverKey: string;
+  serverKey?: string;
+  /**
+   * Disables encryption. Not recommended if the server is open to public.
+   * @default false
+   */
+  disableEncryption?: boolean;
   /**
    * Shard count to send to the discord API, only used if shared sharding is disabled
    * @default 1
@@ -132,8 +137,9 @@ export class Client extends DiscordClient {
         ? true
         : this.options.sharedShardingEnabled;
 
+    this.options.disableEncryption = options.disableEncryption || false;
     if (this.options.sharedShardingEnabled) {
-      if (!this.options.serverKey) {
+      if (!this.options.serverKey && !this.options.disableEncryption) {
         throw new Error("Server Key is required for encryption.");
       }
       this.options.port = this.options.port || 5252;
@@ -184,7 +190,11 @@ export class Client extends DiscordClient {
       `Connected to ${this.socket.remoteAddress}:${this.socket.remotePort}!`
     );
     this.crypto = new ClientCrypto(Buffer.from(this.options.serverKey, "hex"));
-    this.session = new ClientSession(this.socket, this.crypto);
+    this.session = new ClientSession(
+      this.socket,
+      this.crypto,
+      this.options.disableEncryption
+    );
     this.session.client = this;
     this.crypto.session = this.session;
     const handshakePacket = new HandshakePacket();
