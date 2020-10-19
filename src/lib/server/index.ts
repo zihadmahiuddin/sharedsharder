@@ -175,6 +175,7 @@ export class Server extends EventEmitter {
 
   private heartbeatCheck = () => {
     for (const session of this.sessions) {
+      if (!session.loggedIn) return;
       const secondsSinceLastHeartbeat =
         (Date.now() - session?.lastHeartbeat) / 1000;
       if (secondsSinceLastHeartbeat >= 30) {
