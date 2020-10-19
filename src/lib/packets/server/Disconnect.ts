@@ -1,8 +1,8 @@
 import Logger from "../../util/Logger";
 import Packet from "../Packet";
 
-export default class LoginFailedPacket extends Packet {
-  id = 20103;
+export default class DisconnectPacket extends Packet {
+  id = 20109;
 
   code: number;
   message: string;
@@ -19,7 +19,7 @@ export default class LoginFailedPacket extends Packet {
 
   processReceive() {
     Logger.error(
-      `Login Failed: ${this.code}${this.message ? `, ${this.message}` : ""}`
+      `Disconnected: ${this.code}${this.message ? `, ${this.message}` : ""}`
     );
     if (this.code === 2) {
       process.exit(0);

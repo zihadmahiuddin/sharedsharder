@@ -32,15 +32,26 @@ export default class LoginPacket extends Packet {
   processReceive() {
     if (this.session instanceof ServerSession) {
       if (this.botToken === this.session.botToken) {
-        const loginOk = new LoginOkPacket();
-        this.session.loggedIn = true;
-        if (this.shardIds.length) {
-          this.session.shardIds = this.shardIds;
+        if (
+          this.session.server.connectedShardIds.length >=
+          this.session.server.options.shardCount
+        ) {
+          const loginFailed = new LoginFailedPacket();
+          loginFailed.code = 2;
+          loginFailed.message = "No more shards needed";
+          this.session.sendPacket(loginFailed);
+        } else {
+          const loginOk = new LoginOkPacket();
+          this.session.loggedIn = true;
+          if (this.shardIds.length) {
+            this.session.shardIds = this.shardIds;
+          }
+          this.session.sendPacket(loginOk);
         }
-        this.session.sendPacket(loginOk);
       } else {
         const loginFailed = new LoginFailedPacket();
-        loginFailed.reason = "Invalid token";
+        loginFailed.code = 1;
+        loginFailed.message = "Invalid token";
         this.session.sendPacket(loginFailed);
       }
     }

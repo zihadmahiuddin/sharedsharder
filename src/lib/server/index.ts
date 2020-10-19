@@ -1,5 +1,6 @@
 import { EventEmitter } from "events";
 import net from "net";
+import DisconnectPacket from "../packets/server/Disconnect";
 import HeartbeatAckPacket from "../packets/server/HeartbeatAck";
 import ShardInfoPacket from "../packets/server/ShardInfo";
 import Logger from "../util/Logger";
@@ -181,7 +182,10 @@ export class Server extends EventEmitter {
           `Disconnecting ${session.socket.remoteAddress}:${session.socket.remotePort} as the last heartbeat was received more than ${secondsSinceLastHeartbeat} seconds ago.`
         );
         session.socket.destroy();
-        this.sessions.splice(this.sessions.indexOf(session), 1);
+        this.emit(
+          "clientDisconnected",
+          this.sessions.splice(this.sessions.indexOf(session), 1)[0]
+        );
       } else if (secondsSinceLastHeartbeat >= 10) {
         Logger.warn(
           `The last heartbeat from ${session.socket.remoteAddress}:${session.socket.remotePort} was received more than ${secondsSinceLastHeartbeat} seconds ago.`
@@ -198,6 +202,12 @@ export class Server extends EventEmitter {
       if (sessionArray.filter((x) => x.shardIds.length).every((x) => x.ready)) {
         if (session.loggedIn && session.maxShardCount) {
           if (!session.shardIds.length) {
+            if (this.connectedShardIds.length >= this.options.shardCount) {
+              const disconnectPacket = new DisconnectPacket();
+              disconnectPacket.code = 2;
+              disconnectPacket.message = "No more shards needed";
+              session.sendPacket(disconnectPacket);
+            }
             const shardInfoPacket = new ShardInfoPacket();
             shardInfoPacket.shardCount = this.options.shardCount;
             shardInfoPacket.shardIds = this.getNextShardIds(
