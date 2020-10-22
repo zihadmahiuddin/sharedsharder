@@ -5,7 +5,7 @@ dotenv.config();
 import { Server } from "..";
 
 const server = new Server({
-  disableEncryption: true,
+  disableEncryption: false,
   shardCount: 2,
   secretKey: process.env.SERVER_SECRET_KEY,
   token: process.env.DISCORD_TOKEN,

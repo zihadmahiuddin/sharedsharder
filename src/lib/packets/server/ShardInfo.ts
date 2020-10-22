@@ -24,9 +24,6 @@ export default class ShardInfoPacket extends Packet {
   }
 
   processReceive() {
-    console.log(
-      `Shard Info Received: ${this.shardCount} - [${this.shardIds.join(", ")}]`
-    );
     if (this.session instanceof ClientSession) {
       this.session.client.shardCount = this.shardCount;
       this.session.client.shardIds = this.shardIds;

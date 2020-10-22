@@ -10,10 +10,7 @@ export default class ServerCrypto implements Crypto {
   clientPublicKey?: Buffer;
   keyPair: nacl.BoxKeyPair;
   nonce?: Nonce;
-  rnonce?: Nonce;
   sharedKey?: Buffer;
-  snonce?: Nonce;
-  tmpSharedKey?: Buffer;
   session: Session;
 
   constructor(secretKey: string) {
@@ -27,14 +24,13 @@ export default class ServerCrypto implements Crypto {
     } else if (id === 20103 && !this.session.sessionKey) {
       return payload;
     } else if (id === 20103 || id === 20104) {
-      payload = Buffer.concat([this.rnonce.payload, this.sharedKey, payload]);
       return Buffer.from(
-        nacl.box.after(payload, this.nonce.payload, this.tmpSharedKey)
+        nacl.box.after(payload, this.nonce.payload, this.sharedKey)
       );
     } else {
-      this.rnonce.increment(2);
+      this.nonce.increment(2);
       return Buffer.from(
-        nacl.box.after(payload, this.rnonce.payload, this.sharedKey)
+        nacl.box.after(payload, this.nonce.payload, this.sharedKey)
       );
     }
   }
@@ -44,38 +40,28 @@ export default class ServerCrypto implements Crypto {
       return encryptedPayload;
     } else if (id === 10101) {
       this.clientPublicKey = encryptedPayload.slice(0, 32);
-      const nonce = new Nonce({
+      this.nonce = new Nonce({
+        bytes: this.session.sessionKey,
         publicKey: this.clientPublicKey,
         serverKey: this.keyPair.publicKey,
       });
-      this.tmpSharedKey = Buffer.from(
+      this.sharedKey = Buffer.from(
         nacl.box.before(this.clientPublicKey, this.keyPair.secretKey)
       );
       const payload = Buffer.from(
         nacl.box.open.after(
           encryptedPayload.slice(32),
-          nonce.payload,
-          this.tmpSharedKey
+          this.nonce.payload,
+          this.sharedKey
         )
       );
-      this.snonce = new Nonce(payload.slice(24, 48));
-      this.rnonce = new Nonce();
-      const keyPair = nacl.box.keyPair();
-      this.sharedKey = Buffer.from(
-        nacl.box.before(keyPair.publicKey, keyPair.secretKey)
-      );
-      this.nonce = new Nonce({
-        bytes: this.snonce.payload,
-        publicKey: this.clientPublicKey,
-        serverKey: this.keyPair.publicKey,
-      });
-      return payload.slice(48);
+      return payload;
     } else {
-      this.snonce.increment(2);
+      this.nonce.increment(2);
       return Buffer.from(
         nacl.box.open.after(
           encryptedPayload,
-          this.snonce.payload,
+          this.nonce.payload,
           this.sharedKey
         )
       );
