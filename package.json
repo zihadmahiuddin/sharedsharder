@@ -31,8 +31,6 @@
     "node": ">=10"
   },
   "devDependencies": {
-    "@types/bytebuffer": "^5.0.41",
-    "@types/node": "^14.11.8",
     "@typescript-eslint/eslint-plugin": "^4.0.1",
     "@typescript-eslint/parser": "^4.0.1",
     "eslint": "^7.8.0",
@@ -42,8 +40,7 @@
     "npm-run-all": "^4.1.5",
     "open-cli": "^6.0.1",
     "prettier": "^2.1.1",
-    "typedoc": "^0.19.0",
-    "typescript": "^4.0.2"
+    "typedoc": "^0.19.0"
   },
   "files": [
     "build/main",
@@ -55,10 +52,13 @@
     "README.md"
   ],
   "dependencies": {
+    "@types/bytebuffer": "^5.0.41",
+    "@types/node": "^14.11.8",
     "bytebuffer": "^5.0.1",
     "discord.js": "^12.3.1",
     "leeks.js": "^0.0.9",
-    "tweetnacl": "^1.0.3"
+    "tweetnacl": "^1.0.3",
+    "typescript": "^4.0.2"
   },
   "optionalDependencies": {
     "dotenv": "^8.2.0"
