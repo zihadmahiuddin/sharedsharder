@@ -160,6 +160,12 @@ export class Server extends EventEmitter {
         this.sessions.splice(this.sessions.indexOf(session), 1)[0]
       );
     });
+    socket.on("end", () => {
+      this.emit(
+        "clientDisconnected",
+        this.sessions.splice(this.sessions.indexOf(session), 1)[0]
+      );
+    });
     this.emit("connection", session);
   };
 
