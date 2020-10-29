@@ -155,16 +155,16 @@ export class Server extends EventEmitter {
       Logger.error("SocketShard Server client error", err);
     });
     socket.on("close", () => {
-      this.emit(
-        "clientDisconnected",
-        this.sessions.splice(this.sessions.indexOf(session), 1)[0]
-      );
+      this.sessions.splice(this.sessions.indexOf(session), 1);
+      if (session) {
+        this.emit("clientDisconnected", session);
+      }
     });
     socket.on("end", () => {
-      this.emit(
-        "clientDisconnected",
-        this.sessions.splice(this.sessions.indexOf(session), 1)[0]
-      );
+      this.sessions.splice(this.sessions.indexOf(session), 1);
+      if (session) {
+        this.emit("clientDisconnected", session);
+      }
     });
     this.emit("connection", session);
   };
@@ -200,10 +200,10 @@ export class Server extends EventEmitter {
           `Disconnecting ${session.socket.remoteAddress}:${session.socket.remotePort} as the last heartbeat was received more than ${secondsSinceLastHeartbeat} seconds ago.`
         );
         session.socket.destroy();
-        this.emit(
-          "clientDisconnected",
-          this.sessions.splice(this.sessions.indexOf(session), 1)[0]
-        );
+        this.sessions.splice(this.sessions.indexOf(session), 1);
+        if (session) {
+          this.emit("clientDisconnected", session);
+        }
       } else if (secondsSinceLastHeartbeat >= 10) {
         Logger.warn(
           `The last heartbeat from ${session.socket.remoteAddress}:${session.socket.remotePort} was received more than ${secondsSinceLastHeartbeat} seconds ago.`
