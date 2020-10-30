@@ -155,15 +155,21 @@ export class Server extends EventEmitter {
       Logger.error("SocketShard Server client error", err);
     });
     socket.on("close", () => {
-      this.sessions.splice(this.sessions.indexOf(session), 1);
-      if (session) {
-        this.emit("clientDisconnected", session);
+      const sessionIndex = this.sessions.indexOf(session);
+      if (sessionIndex >= 0) {
+        this.sessions.splice(this.sessions.indexOf(session), 1);
+        if (session) {
+          this.emit("clientDisconnected", session);
+        }
       }
     });
     socket.on("end", () => {
-      this.sessions.splice(this.sessions.indexOf(session), 1);
-      if (session) {
-        this.emit("clientDisconnected", session);
+      const sessionIndex = this.sessions.indexOf(session);
+      if (sessionIndex >= 0) {
+        this.sessions.splice(this.sessions.indexOf(session), 1);
+        if (session) {
+          this.emit("clientDisconnected", session);
+        }
       }
     });
     this.emit("connection", session);
