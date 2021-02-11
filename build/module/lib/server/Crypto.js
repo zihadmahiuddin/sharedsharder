@@ -1,0 +1,46 @@
+import { config as loadenv } from "dotenv";
+import nacl from "tweetnacl";
+import Nonce from "../util/Nonce";
+loadenv();
+export default class ServerCrypto {
+    constructor(secretKey) {
+        const secretKeyBuffer = Buffer.from(secretKey, "hex");
+        this.keyPair = nacl.box.keyPair.fromSecretKey(secretKeyBuffer);
+    }
+    encrypt(id, payload) {
+        if (id === 20100) {
+            return payload;
+        }
+        else if (id === 20103 && !this.session.sessionKey) {
+            return payload;
+        }
+        else if (id === 20103 || id === 20104) {
+            return Buffer.from(nacl.box.after(payload, this.nonce.payload, this.sharedKey));
+        }
+        else {
+            this.nonce.increment(2);
+            return Buffer.from(nacl.box.after(payload, this.nonce.payload, this.sharedKey));
+        }
+    }
+    decrypt(id, encryptedPayload) {
+        if (id === 10100) {
+            return encryptedPayload;
+        }
+        else if (id === 10101) {
+            this.clientPublicKey = encryptedPayload.slice(0, 32);
+            this.nonce = new Nonce({
+                bytes: this.session.sessionKey,
+                publicKey: this.clientPublicKey,
+                serverKey: this.keyPair.publicKey,
+            });
+            this.sharedKey = Buffer.from(nacl.box.before(this.clientPublicKey, this.keyPair.secretKey));
+            const payload = Buffer.from(nacl.box.open.after(encryptedPayload.slice(32), this.nonce.payload, this.sharedKey));
+            return payload;
+        }
+        else {
+            this.nonce.increment(2);
+            return Buffer.from(nacl.box.open.after(encryptedPayload, this.nonce.payload, this.sharedKey));
+        }
+    }
+}
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiQ3J5cHRvLmpzIiwic291cmNlUm9vdCI6IiIsInNvdXJjZXMiOlsiLi4vLi4vLi4vLi4vc3JjL2xpYi9zZXJ2ZXIvQ3J5cHRvLnRzIl0sIm5hbWVzIjpbXSwibWFwcGluZ3MiOiJBQUFBLE9BQU8sRUFBRSxNQUFNLElBQUksT0FBTyxFQUFFLE1BQU0sUUFBUSxDQUFDO0FBQzNDLE9BQU8sSUFBSSxNQUFNLFdBQVcsQ0FBQztBQUc3QixPQUFPLEtBQUssTUFBTSxlQUFlLENBQUM7QUFFbEMsT0FBTyxFQUFFLENBQUM7QUFFVixNQUFNLENBQUMsT0FBTyxPQUFPLFlBQVk7SUFPL0IsWUFBWSxTQUFpQjtRQUMzQixNQUFNLGVBQWUsR0FBRyxNQUFNLENBQUMsSUFBSSxDQUFDLFNBQVMsRUFBRSxLQUFLLENBQUMsQ0FBQztRQUN0RCxJQUFJLENBQUMsT0FBTyxHQUFHLElBQUksQ0FBQyxHQUFHLENBQUMsT0FBTyxDQUFDLGFBQWEsQ0FBQyxlQUFlLENBQUMsQ0FBQztJQUNqRSxDQUFDO0lBRUQsT0FBTyxDQUFDLEVBQVUsRUFBRSxPQUFlO1FBQ2pDLElBQUksRUFBRSxLQUFLLEtBQUssRUFBRTtZQUNoQixPQUFPLE9BQU8sQ0FBQztTQUNoQjthQUFNLElBQUksRUFBRSxLQUFLLEtBQUssSUFBSSxDQUFDLElBQUksQ0FBQyxPQUFPLENBQUMsVUFBVSxFQUFFO1lBQ25ELE9BQU8sT0FBTyxDQUFDO1NBQ2hCO2FBQU0sSUFBSSxFQUFFLEtBQUssS0FBSyxJQUFJLEVBQUUsS0FBSyxLQUFLLEVBQUU7WUFDdkMsT0FBTyxNQUFNLENBQUMsSUFBSSxDQUNoQixJQUFJLENBQUMsR0FBRyxDQUFDLEtBQUssQ0FBQyxPQUFPLEVBQUUsSUFBSSxDQUFDLEtBQUssQ0FBQyxPQUFPLEVBQUUsSUFBSSxDQUFDLFNBQVMsQ0FBQyxDQUM1RCxDQUFDO1NBQ0g7YUFBTTtZQUNMLElBQUksQ0FBQyxLQUFLLENBQUMsU0FBUyxDQUFDLENBQUMsQ0FBQyxDQUFDO1lBQ3hCLE9BQU8sTUFBTSxDQUFDLElBQUksQ0FDaEIsSUFBSSxDQUFDLEdBQUcsQ0FBQyxLQUFLLENBQUMsT0FBTyxFQUFFLElBQUksQ0FBQyxLQUFLLENBQUMsT0FBTyxFQUFFLElBQUksQ0FBQyxTQUFTLENBQUMsQ0FDNUQsQ0FBQztTQUNIO0lBQ0gsQ0FBQztJQUVELE9BQU8sQ0FBQyxFQUFVLEVBQUUsZ0JBQXdCO1FBQzFDLElBQUksRUFBRSxLQUFLLEtBQUssRUFBRTtZQUNoQixPQUFPLGdCQUFnQixDQUFDO1NBQ3pCO2FBQU0sSUFBSSxFQUFFLEtBQUssS0FBSyxFQUFFO1lBQ3ZCLElBQUksQ0FBQyxlQUFlLEdBQUcsZ0JBQWdCLENBQUMsS0FBSyxDQUFDLENBQUMsRUFBRSxFQUFFLENBQUMsQ0FBQztZQUNyRCxJQUFJLENBQUMsS0FBSyxHQUFHLElBQUksS0FBSyxDQUFDO2dCQUNyQixLQUFLLEVBQUUsSUFBSSxDQUFDLE9BQU8sQ0FBQyxVQUFVO2dCQUM5QixTQUFTLEVBQUUsSUFBSSxDQUFDLGVBQWU7Z0JBQy9CLFNBQVMsRUFBRSxJQUFJLENBQUMsT0FBTyxDQUFDLFNBQVM7YUFDbEMsQ0FBQyxDQUFDO1lBQ0gsSUFBSSxDQUFDLFNBQVMsR0FBRyxNQUFNLENBQUMsSUFBSSxDQUMxQixJQUFJLENBQUMsR0FBRyxDQUFDLE1BQU0sQ0FBQyxJQUFJLENBQUMsZUFBZSxFQUFFLElBQUksQ0FBQyxPQUFPLENBQUMsU0FBUyxDQUFDLENBQzlELENBQUM7WUFDRixNQUFNLE9BQU8sR0FBRyxNQUFNLENBQUMsSUFBSSxDQUN6QixJQUFJLENBQUMsR0FBRyxDQUFDLElBQUksQ0FBQyxLQUFLLENBQ2pCLGdCQUFnQixDQUFDLEtBQUssQ0FBQyxFQUFFLENBQUMsRUFDMUIsSUFBSSxDQUFDLEtBQUssQ0FBQyxPQUFPLEVBQ2xCLElBQUksQ0FBQyxTQUFTLENBQ2YsQ0FDRixDQUFDO1lBQ0YsT0FBTyxPQUFPLENBQUM7U0FDaEI7YUFBTTtZQUNMLElBQUksQ0FBQyxLQUFLLENBQUMsU0FBUyxDQUFDLENBQUMsQ0FBQyxDQUFDO1lBQ3hCLE9BQU8sTUFBTSxDQUFDLElBQUksQ0FDaEIsSUFBSSxDQUFDLEdBQUcsQ0FBQyxJQUFJLENBQUMsS0FBSyxDQUNqQixnQkFBZ0IsRUFDaEIsSUFBSSxDQUFDLEtBQUssQ0FBQyxPQUFPLEVBQ2xCLElBQUksQ0FBQyxTQUFTLENBQ2YsQ0FDRixDQUFDO1NBQ0g7SUFDSCxDQUFDO0NBQ0YifQ==
