@@ -5,6 +5,7 @@ dotenv.config();
 import { Server } from "..";
 
 const server = new Server({
+  // encryption is bugged rn
   disableEncryption: false,
   shardCount: 2,
   secretKey: process.env.SERVER_SECRET_KEY,

@@ -1,7 +1,8 @@
 import { Client } from "..";
 
 const client = new Client({
-  disableEncryption: false,
+  // encryption is bugged rn
+  disableEncryption: true,
   maxShardCount: 1,
   serverKey: process.env.SERVER_PUBLIC_KEY,
   // sharedShardingEnabled: false,

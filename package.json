@@ -1,6 +1,6 @@
 {
   "name": "sharedsharder",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Shard your discord.js bot across devices!",
   "main": "build/main/index.js",
   "typings": "build/main/index.d.ts",
@@ -32,6 +32,8 @@
   "devDependencies": {
     "@typescript-eslint/eslint-plugin": "^4.0.1",
     "@typescript-eslint/parser": "^4.0.1",
+    "@types/bytebuffer": "^5.0.41",
+    "@types/node": "^14.11.8",
     "eslint": "^7.8.0",
     "eslint-config-prettier": "^6.11.0",
     "eslint-plugin-eslint-comments": "^3.2.0",
@@ -39,7 +41,8 @@
     "npm-run-all": "^4.1.5",
     "open-cli": "^6.0.1",
     "prettier": "^2.1.1",
-    "typedoc": "^0.19.0"
+    "typedoc": "^0.19.0",
+    "typescript": "^4.0.2"
   },
   "files": [
     "build/main",
@@ -51,14 +54,11 @@
     "README.md"
   ],
   "dependencies": {
-    "@types/bytebuffer": "^5.0.41",
-    "@types/node": "^14.11.8",
     "bytebuffer": "^5.0.1",
     "discord.js": "^12.3.1",
     "flatted": "^3.1.0",
     "leeks.js": "^0.0.9",
-    "tweetnacl": "^1.0.3",
-    "typescript": "^4.0.2"
+    "tweetnacl": "^1.0.3"
   },
   "optionalDependencies": {
     "dotenv": "^8.2.0"
