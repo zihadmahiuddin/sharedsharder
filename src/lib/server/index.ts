@@ -223,7 +223,11 @@ export class Server extends EventEmitter {
     if (this.latestShardInfoSendTime + 5000 > Date.now()) return;
     const sessionArray = Array.from(this.sessions.values());
     for (const session of sessionArray) {
-      if (sessionArray.filter((x) => x.shardIds.length).every((x) => x.ready)) {
+      if (
+        sessionArray
+          .filter((x) => x !== session && x.shardIds.length)
+          .every((x) => x.ready)
+      ) {
         if (session.loggedIn && session.maxShardCount) {
           if (!session.shardIds.length) {
             if (this.connectedShardIds.length >= this.options.shardCount) {
@@ -251,7 +255,7 @@ export class Server extends EventEmitter {
   private onListening = () => {
     this.emit("listening");
     this.heartbeatCheckInterval = setInterval(this.heartbeatCheck, 5000);
-    this.shardDistributionInterval = setInterval(this.shardDistribution, 100);
+    this.shardDistributionInterval = setInterval(this.shardDistribution, 2000);
   };
 
   get connectedShardIds() {
